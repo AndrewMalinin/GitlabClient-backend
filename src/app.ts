@@ -4,12 +4,14 @@ import bodyParser from 'body-parser';
 import apiRouter from './routes/api/index';
 import {errors} from 'celebrate';
 import {errorHandler} from './middlewares/errorHandler';
-import {corsResolver} from './middlewares/corsChecker';
+
+import dbConfig from './config/db';
+import mongoose from 'mongoose';
+import db from './config/db';
 
 const PORT = 3000;
 
 // process.chdir(__dirname);
-
 
 const app = express();
 app.use(
@@ -18,12 +20,10 @@ app.use(
       crossOriginEmbedderPolicy: false,
    })
 );
-app.use(corsResolver);
 
 app.disable('x-powered-by');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-
 
 app.use('/api', apiRouter);
 
@@ -34,6 +34,11 @@ app.use('/api', apiRouter);
 // app.use(logger); // подключаем логгер запросов
 app.use(errors());
 app.use(errorHandler);
+
+mongoose
+   .connect(db.url)
+   .then(() => console.log('Database connected!'))
+   .catch(err => console.log(`Database connection error: ${err.name} (${err.message})`));
 
 app.listen(PORT, () => {
    console.log(`> App listening on port ${PORT}`);
