@@ -1,11 +1,17 @@
 import mongoose from 'mongoose';
 
-const projectSchema = new mongoose.Schema(
+export interface IProject {
+    gitlab_id: number;
+    name: string;
+    namespace?: string;
+    web_url: string;
+}
+
+const projectSchema = new mongoose.Schema<IProject>(
     {
         gitlab_id: {
             type: Number,
             required: true,
-            unique: true
         },
         name: {
             type: String
@@ -18,7 +24,7 @@ const projectSchema = new mongoose.Schema(
             required: true
         }
     },
-    { versionKey: false }
+    { versionKey: false, _id: false }
 );
 
 export default projectSchema;

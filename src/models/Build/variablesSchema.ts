@@ -1,17 +1,28 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose from 'mongoose';
 
-const OneVariableSchema = new mongoose.Schema({
+export interface IVariable {
+    key: string,
+    variable_type: string,
+    value: string
+}
+
+export interface IVariables {
+    projectVariables: IVariable[],
+    pipelineVariables: IVariable[]
+}
+
+const OneVariableSchema = new mongoose.Schema<IVariable>({
     key: String,
     variable_type: String,
     value: String
 });
 
-const variablesSchema = new mongoose.Schema(
+const variablesSchema = new mongoose.Schema<IVariables>(
     {
         projectVariables: [OneVariableSchema],
         pipelineVariables: [OneVariableSchema]
     },
-    { versionKey: false }
+    { versionKey: false, _id: false }
 );
 
 export default variablesSchema;

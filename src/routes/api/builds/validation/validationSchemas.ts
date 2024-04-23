@@ -1,4 +1,4 @@
-import { celebrate, Joi } from 'celebrate';
+import { celebrate, Joi, Segments } from 'celebrate';
 
 const variableValidationSchema = Joi.object({
     key: Joi.string().required(),
@@ -6,8 +6,10 @@ const variableValidationSchema = Joi.object({
     value: Joi.string().required()
 });
 
+const idParamValidationSchema = Joi.number().required();
+
 export const addBuildValidationSchema = celebrate({
-    body: Joi.object({
+    [Segments.BODY]: Joi.object({
         project: Joi.object({
             gitlab_id: Joi.number().required(),
             name: Joi.string().required(),
@@ -28,5 +30,11 @@ export const addBuildValidationSchema = celebrate({
             pipelineVariables: Joi.array().items(variableValidationSchema)
         }).required(),
         defines: Joi.array().items(Joi.object())
+    }).required()
+});
+
+export const deleteBuildValidationSchema = celebrate({
+    [Segments.PARAMS]: Joi.object({
+        id: idParamValidationSchema
     }).required()
 });

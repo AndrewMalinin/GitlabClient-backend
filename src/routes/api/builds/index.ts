@@ -1,10 +1,11 @@
 import express from 'express';
 import buildsController from '../../../controllers/api/builds';
-import { addBuildValidationSchema } from './validation/validationSchemas';
+import { addBuildValidationSchema, deleteBuildValidationSchema } from './validation/validationSchemas';
 
 const buildsRouter = express.Router();
 
 buildsRouter.get('/', buildsController.getAllBuilds);
 buildsRouter.post('/', addBuildValidationSchema, buildsController.addBuild);
+buildsRouter.delete('/:id', buildsController.deleteBuild);
 
 export default buildsRouter;

@@ -1,28 +1,69 @@
-import {RequestHandler} from 'express';
+import { RequestHandler } from 'express';
 import Build from '../../../models/Build';
-import {InternalServerError} from '../../../errors/internalServer';
+import { InternalServerError } from '../../../errors/internalServer';
+import { IBuildsRequestData } from '../../../routes/api/builds/types';
+import User, { getUserOrCreate } from '../../../models/User';
+import { PIPELINE_STATUS } from '../../../models/Build/pipelineSchema';
+import { BadRequestError } from '../../../errors/badRequest';
+import { ConflictError } from '../../../errors/conflict';
 
 const getAllBuilds: RequestHandler = (req, res, next) => {
-   Build.find({})
-      .then(builds => res.send(builds))
-      .catch(err => {
-         console.log(err);
-         next(new InternalServerError());
-      });
-   // next();
+    Build.find({})
+        .lean()
+        .then((builds) => res.send(builds))
+        .catch((err) => {
+            console.log(err);
+            next(new InternalServerError());
+        });
+    // next();
 };
 
-const addBuild: RequestHandler = (req, res, next) => {
-   const props = req.body;
+const addBuild: RequestHandler = async (req, res, next) => {
+    const props: IBuildsRequestData['CREATE_BUILD'] = req.body;
+    const initiator = await getUserOrCreate(props.initiator);
+    const isBuildExist = !!(await Build.exists({ id: props.pipeline.gitlab_id }));
+    if (isBuildExist) return next(new ConflictError('Сборка с данными параметрами уже существует'));
+    Build.create({
+        ...props,
+        id: props.pipeline.gitlab_id,
+        pipeline: { ...props.pipeline, status: PIPELINE_STATUS.UNKNOWN },
+        created_at: Date.now(),
+        initiator
+    })
+        .then((builds) => res.send(builds))
+        .catch((err) => {
+            console.log(err);
+            if (err.name === 'ValidationError') {
+                next(new BadRequestError());
+            } else {
+                next(new InternalServerError());
+            }
+        });
+    //next();
+};
+
+const deleteBuild: RequestHandler = async (req, res, next) => {
+   const props: IBuildsRequestData['CREATE_BUILD'] = req.body;
+   const initiator = await getUserOrCreate(props.initiator);
+   const isBuildExist = !!(await Build.exists({ id: props.pipeline.gitlab_id }));
+   if (isBuildExist) return next(new ConflictError('Сборка с данными параметрами уже существует'));
    Build.create({
-      //branch: props.
+       ...props,
+       id: props.pipeline.gitlab_id,
+       pipeline: { ...props.pipeline, status: PIPELINE_STATUS.UNKNOWN },
+       created_at: Date.now(),
+       initiator
    })
-      .then(builds => res.send(builds))
-      .catch(err => {
-         console.log(err)
-         next(new InternalServerError())
-      });
-   next();
+       .then((builds) => res.send(builds))
+       .catch((err) => {
+           console.log(err);
+           if (err.name === 'ValidationError') {
+               next(new BadRequestError());
+           } else {
+               next(new InternalServerError());
+           }
+       });
+   //next();
 };
 
 // module.exports.getAllMovies = (req, res, next) => {
@@ -73,6 +114,6 @@ const addBuild: RequestHandler = (req, res, next) => {
 // };
 
 export default {
-   getAllBuilds,
-   addBuild,
+    getAllBuilds,
+    addBuild
 };

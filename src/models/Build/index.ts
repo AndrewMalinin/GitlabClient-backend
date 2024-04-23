@@ -1,10 +1,33 @@
 import mongoose, { Schema } from 'mongoose';
-import projectSchema from './projectSchema';
-import pipelineSchema from './pipelineSchema';
-import variablesSchema from './variablesSchema';
+import projectSchema, { IProject } from './projectSchema';
+import pipelineSchema, { IPipeline } from './pipelineSchema';
+import variablesSchema, { IVariables } from './variablesSchema';
+import { IUser } from '../User';
 
-const buildSchema = new mongoose.Schema(
+export interface IBuild {
+    /**
+     * Pipeline GitLab ID
+     *
+     * @type {number}
+     * @memberof IBuild
+     */
+    id: number;
+    branch: string;
+    initiator: IUser;
+    project: IProject;
+    variables: IVariables;
+    defines: any[];
+    pipeline: IPipeline;
+    created_at: Date;
+}
+
+const buildSchema = new mongoose.Schema<IBuild>(
     {
+        id: {
+            type: Number,
+            required: true,
+            unique: true
+        },
         project: {
             type: projectSchema,
             required: true

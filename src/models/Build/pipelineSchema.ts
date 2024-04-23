@@ -17,12 +17,23 @@ export enum PIPELINE_STATUS {
     UNKNOWN = 'unknown'
 }
 
-const pipelineSchema = new mongoose.Schema(
+export interface IPipeline {
+    gitlab_id: number;
+    approved: boolean;
+    status: PIPELINE_STATUS;
+    started_at: Date;
+    finished_at: Date;
+    duration: number;
+    web_url: string;
+}
+
+const pipelineSchema = new mongoose.Schema<IPipeline>(
     {
         // Id пайплайна на гитлабе
         gitlab_id: {
             type: Number,
-            required: true
+            required: true,
+            unique: true
         },
         // True если статус пайплайна был подтверждён воркером,
         // запрашивающим статусы пайплайнов после запуска
@@ -58,10 +69,10 @@ const pipelineSchema = new mongoose.Schema(
             type: Number
         },
         web_url: {
-            type: String
+            type: String,
         }
     },
-    { versionKey: false }
+    { versionKey: false, _id: false }
 );
 
 export default pipelineSchema;
