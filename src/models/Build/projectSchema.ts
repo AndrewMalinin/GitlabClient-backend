@@ -12,9 +12,11 @@ const projectSchema = new mongoose.Schema<IProject>(
         gitlab_id: {
             type: Number,
             required: true,
+            unique: false,
+            index: true
         },
         name: {
-            type: String
+            type: String,
         },
         namespace: {
             type: String

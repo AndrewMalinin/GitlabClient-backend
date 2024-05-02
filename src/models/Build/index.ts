@@ -26,17 +26,16 @@ const buildSchema = new mongoose.Schema<IBuild>(
         id: {
             type: Number,
             required: true,
-            unique: true
+            unique: true,
+            index: true
         },
         project: {
-            type: projectSchema,
-            required: true
+            type: projectSchema
         },
         variables: variablesSchema,
         defines: [Schema.Types.Mixed],
         pipeline: {
-            type: pipelineSchema,
-            required: true
+            type: pipelineSchema
         },
         branch: {
             type: String,
@@ -44,8 +43,7 @@ const buildSchema = new mongoose.Schema<IBuild>(
         },
         initiator: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'user',
-            required: true
+            ref: 'user'
         },
         created_at: {
             type: Date,

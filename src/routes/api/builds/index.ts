@@ -6,6 +6,6 @@ const buildsRouter = express.Router();
 
 buildsRouter.get('/', buildsController.getAllBuilds);
 buildsRouter.post('/', addBuildValidationSchema, buildsController.addBuild);
-buildsRouter.delete('/:id', buildsController.deleteBuild);
+buildsRouter.delete('/:id', deleteBuildValidationSchema, buildsController.deleteBuild);
 
 export default buildsRouter;

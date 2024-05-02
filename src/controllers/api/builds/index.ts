@@ -6,6 +6,8 @@ import User, { getUserOrCreate } from '../../../models/User';
 import { PIPELINE_STATUS } from '../../../models/Build/pipelineSchema';
 import { BadRequestError } from '../../../errors/badRequest';
 import { ConflictError } from '../../../errors/conflict';
+import { NotFoundError } from '../../../errors/notFound';
+import { HTTP_STATUS_CODE } from '../../../types';
 
 const getAllBuilds: RequestHandler = (req, res, next) => {
     Build.find({})
@@ -32,7 +34,7 @@ const addBuild: RequestHandler = async (req, res, next) => {
     })
         .then((builds) => res.send(builds))
         .catch((err) => {
-            console.log(err);
+            console.log(err)
             if (err.name === 'ValidationError') {
                 next(new BadRequestError());
             } else {
@@ -43,27 +45,18 @@ const addBuild: RequestHandler = async (req, res, next) => {
 };
 
 const deleteBuild: RequestHandler = async (req, res, next) => {
-   const props: IBuildsRequestData['CREATE_BUILD'] = req.body;
-   const initiator = await getUserOrCreate(props.initiator);
-   const isBuildExist = !!(await Build.exists({ id: props.pipeline.gitlab_id }));
-   if (isBuildExist) return next(new ConflictError('Сборка с данными параметрами уже существует'));
-   Build.create({
-       ...props,
-       id: props.pipeline.gitlab_id,
-       pipeline: { ...props.pipeline, status: PIPELINE_STATUS.UNKNOWN },
-       created_at: Date.now(),
-       initiator
-   })
-       .then((builds) => res.send(builds))
-       .catch((err) => {
-           console.log(err);
-           if (err.name === 'ValidationError') {
-               next(new BadRequestError());
-           } else {
-               next(new InternalServerError());
-           }
-       });
-   //next();
+    const buildId: number = +req.params['id'];
+    const isBuildExist = !!(await Build.exists({ id: buildId }));
+    if (!isBuildExist) return next(new NotFoundError('Сборка с данным Id не найдена'));
+    Build.deleteOne({ id: buildId })
+        .then(() => res.sendStatus(HTTP_STATUS_CODE.OK))
+        .catch((err) => {
+            if (err.name === 'ValidationError') {
+                next(new BadRequestError());
+            } else {
+                next(new InternalServerError());
+            }
+        });
 };
 
 // module.exports.getAllMovies = (req, res, next) => {
@@ -115,5 +108,6 @@ const deleteBuild: RequestHandler = async (req, res, next) => {
 
 export default {
     getAllBuilds,
-    addBuild
+    addBuild,
+    deleteBuild
 };

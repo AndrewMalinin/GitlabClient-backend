@@ -33,7 +33,8 @@ const pipelineSchema = new mongoose.Schema<IPipeline>(
         gitlab_id: {
             type: Number,
             required: true,
-            unique: true
+            unique: true,
+            index: true
         },
         // True если статус пайплайна был подтверждён воркером,
         // запрашивающим статусы пайплайнов после запуска
