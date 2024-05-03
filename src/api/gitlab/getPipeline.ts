@@ -3,7 +3,7 @@ import GetPipeline_Command from './commands/getPipeline_command';
 import { GITLAB_API_ENDPOINTS, IGitlabAPIResponse } from './types';
 
 export async function getPipeline(projectId: number, pipelineId: number) {
-    const data = await new GetPipeline_Command(projectId, pipelineId).setToken().send().catch(Promise.reject);
+    const data = await new GetPipeline_Command(projectId, pipelineId).setToken().send()
     //@ts-ignore
     return parsePipelineData(data);
 }

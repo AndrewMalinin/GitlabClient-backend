@@ -1,31 +1,47 @@
-import { parentPort, workerData } from 'worker_threads';
+require('dotenv').config();
+import { parentPort } from 'worker_threads';
 import { getPipeline } from '../../api/gitlab';
-
-let requestParams = ['125_37747'];
+import { TWorkerMessage, WORKER_MESSAGE_TYPE } from './PipelineProvider';
 
 function getPipelineData(projectId: number, pipelineId: number) {
     return new Promise((resolve, reject) => {
         getPipeline(projectId, pipelineId)
             .then((data) => {
-                console.log(data);
+                if (data.approved) {
+                    resolve(
+                        parentPort?.postMessage({
+                            type: WORKER_MESSAGE_TYPE.APPROVE_PIPELINE,
+                            data: {
+                                projectId: projectId,
+                                pipelineId: pipelineId,
+                                data
+                            }
+                        } as TWorkerMessage)
+                    );
+                }
             })
             .catch((err) => {
-                console.log(err);
+                reject(err);
             });
     });
 }
 
-function* requestPipelines() {
-    // const batchCount
-    requestParams.map((item) => {
-        const [projectId, pipelineId] = item.split('_').map(parseInt);
-        getPipelineData(projectId, pipelineId);
+function requestAllQueue(queue: string[]) {
+    queue.map((item) => {
+        const [projectId, pipelineId] = item.split('_').map((str) => parseInt(str));
+        getPipelineData(projectId, pipelineId).catch(() => {});
     });
 }
 
-setTimeout(() => {}, workerData.);
+function parseMainThreadMessage(msg: TWorkerMessage) {
+    switch (msg.type) {
+        case WORKER_MESSAGE_TYPE.UPDATE_QUEUE:
+            requestAllQueue(msg.data.queue);
+            break;
 
-// console.log(process.env);
-// if (parentPort) {
-//    parentPort.postMessage(factorial(workerData.value));
-// }
+        default:
+            break;
+    }
+}
+
+parentPort?.on('message', parseMainThreadMessage);

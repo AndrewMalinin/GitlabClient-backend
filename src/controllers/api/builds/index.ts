@@ -2,7 +2,7 @@ import { RequestHandler } from 'express';
 import Build from '../../../models/Build';
 import { InternalServerError } from '../../../errors/internalServer';
 import { IBuildsRequestData } from '../../../routes/api/builds/types';
-import User, { getUserOrCreate } from '../../../models/User';
+import { getUserOrCreate } from '../../../models/User';
 import { PIPELINE_STATUS } from '../../../models/Build/pipelineSchema';
 import { BadRequestError } from '../../../errors/badRequest';
 import { ConflictError } from '../../../errors/conflict';
@@ -15,7 +15,6 @@ const getAllBuilds: RequestHandler = (req, res, next) => {
         .lean()
         .then((builds) => res.send(builds))
         .catch((err) => {
-            console.log(err);
             next(new InternalServerError());
         });
     // next();
