@@ -26,7 +26,6 @@ export interface IGitlabAPIResponse {
         started_at: string | null;
         finished_at: string | null;
         duration: number;
-        queued_duration: number;
         coverage: number;
         web_url: string;
     };
