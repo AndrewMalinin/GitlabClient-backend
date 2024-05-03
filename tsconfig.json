@@ -1,12 +1,14 @@
 {
-   "extends": "./tsconfig.base.json",
-   "compilerOptions": {
-      "declarationDir": "dist",
-      "rootDir": "./src",
-      "module": "commonjs",
-      "target": "esnext",
-      "moduleResolution": "Node"
-   },
-   "include": ["src"],
-   "exclude": ["node_modules", "dist"]
+    "extends": "./tsconfig.base.json",
+    "compilerOptions": {
+        "declarationDir": "dist",
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "module": "commonjs",
+        "target": "esnext",
+        "moduleResolution": "Node",
+        "skipLibCheck": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"]
 }
